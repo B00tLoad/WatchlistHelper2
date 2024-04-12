@@ -1,6 +1,6 @@
 ---
 name: Feature request
-about: Suggest an idea for this project
+description: Suggest an idea for this project
 title: "[FR] "
 labels: New feature, triage
 assignees: B00tLoad
@@ -14,8 +14,9 @@ body:
   validations:
     required: true
 - type: checkboxes
-  id: 2.0.0
+  id: v2only
   attributes:
+    label: v2 Notice
     options:
       - label: I understand, that new feature will be implemented for v2.0.0 at the earliest. WLH v1 is EOL and will not receive further development efforts except for severe security concerns.
         required: true
