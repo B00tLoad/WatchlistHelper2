@@ -2,8 +2,11 @@ package space.b00tload.discord.watchlist2.config;
 
 public enum ConfigValues {
 
-    DISCORD_TOKEN("discord-token", "d", "DISCORD_APP_TOKEN", "discord.token", null),
-    W2G_TOKEN("w2g-token", "w", "W2G_API_TOKEN", "w2g.token", null);
+    DISCORD_TOKEN("discord-token", "db", "DISCORD_BOT_TOKEN", "discord.token.bot", null),
+    DISCORD_APP_ID("discord-app-id", "da", "DISCORD_APPLICATION_ID", "discord.token.applicationid", null),
+    DISCORD_PUB_KEY("discord-public-key", "dp", "DISCORD_PUBLIC_KEY", "discord.token.publickey", null),
+    W2G_TOKEN("w2g-token", "w", "W2G_API_TOKEN", "w2g.token", null),
+    ;
 
     private final String flag, flagAlias, env, toml, defaultValue;
 
@@ -22,7 +25,7 @@ public enum ConfigValues {
      * @example --discord-token
      */
     public String getFlag() {
-        return flag;
+        return "--" + flag;
     }
 
     /**
@@ -32,7 +35,7 @@ public enum ConfigValues {
      * @example -d
      */
     public String getFlagAlias() {
-        return flagAlias;
+        return "-" + flagAlias;
     }
 
     /**
@@ -49,6 +52,7 @@ public enum ConfigValues {
      * The path to the config value in a toml file.
      *
      * @return the toml path.
+     * @example discord.token
      */
     public String getTomlPath() {
         return toml;

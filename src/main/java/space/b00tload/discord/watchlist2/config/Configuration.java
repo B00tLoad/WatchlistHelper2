@@ -45,7 +45,7 @@ public class Configuration {
             if (values.get(v) == null) missingValues.add(v);
         }
 
-        throw new ConfigIncompleteException("Missing values: ", missingValues);
+        if(!missingValues.isEmpty()) throw new ConfigIncompleteException("Missing values: ", missingValues);
     }
 
     public static Configuration getInstance() {
