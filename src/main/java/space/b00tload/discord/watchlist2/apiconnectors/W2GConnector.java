@@ -5,6 +5,8 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import okhttp3.*;
 import space.b00tload.discord.watchlist2.WatchlistHelperBot;
+import space.b00tload.discord.watchlist2.config.ConfigValues;
+import space.b00tload.discord.watchlist2.config.Configuration;
 import space.b00tload.discord.watchlist2.exceptions.W2GException;
 import space.b00tload.discord.watchlist2.workers.WebRequestThreadPool;
 
@@ -40,7 +42,7 @@ public class W2GConnector {
      */
     public synchronized static W2GConnector getInstance() {
         if (INSTANCE == null) {
-            INSTANCE = new W2GConnector("" /* TODO: implement passing API-key from config.*/);
+            INSTANCE = new W2GConnector(Configuration.getInstance().get(ConfigValues.W2G_TOKEN));
         }
         return INSTANCE;
     }
