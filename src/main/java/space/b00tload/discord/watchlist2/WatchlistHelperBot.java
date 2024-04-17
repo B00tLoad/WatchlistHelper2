@@ -12,10 +12,15 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import space.b00tload.discord.watchlist2.config.ConfigValues;
+import space.b00tload.discord.watchlist2.config.Configuration;
 import space.b00tload.discord.watchlist2.config.TomlConfiguration;
+import space.b00tload.discord.watchlist2.exceptions.ConfigIncompleteException;
 
+import javax.naming.ConfigurationException;
 import java.nio.file.Paths;
 import java.util.*;
+import java.util.stream.Collectors;
 
 public class WatchlistHelperBot {
 
@@ -48,29 +53,28 @@ public class WatchlistHelperBot {
             configurator.setContext(loggerContext);
             loggerContext.reset();
             if(List.of(args).contains("--docker")) {
-                configurator.doConfigure(Objects.requireNonNull(WatchlistHelperBot.class.getResource("/logback-docker.xml")));
+                configurator.doConfigure(Objects.requireNonNull(WatchlistHelperBot.class.getResource("/config/logback/logback-docker.xml")));
             } else {
-                configurator.doConfigure(Objects.requireNonNull(WatchlistHelperBot.class.getResource("/logback-bare.xml")));
+                configurator.doConfigure(Objects.requireNonNull(WatchlistHelperBot.class.getResource("/config/logback/logback-bare.xml")));
             }
         } catch (JoranException ignored){}
         (new StatusPrinter2()).printInCaseOfErrorsOrWarnings(loggerContext);
 
-
-        TomlConfiguration.validate(List.of("discord.token"));
+        try {
+            Configuration.init(args);
+        } catch (ConfigIncompleteException e) {
+            log.error("Config incomplete. Missing: \n\t\t\t{}", e.getMissingValues().stream().map(Object::toString).collect(Collectors.joining("\n\t\t\t")));
+            System.exit(2);
+        }
 
         JDA jda = JDABuilder
-                .create(TomlConfiguration.getString("discord.token"), GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
+                .create(Configuration.getInstance().get(ConfigValues.DISCORD_TOKEN), GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
                 .setActivity(Activity.watching("your watchlist."))
 //                .addEventListeners(new SetupCommand(), new GuildJoinListener(), new RecommendButtonInteractionListener())
                 .disableCache(CacheFlag.ACTIVITY, CacheFlag.EMOJI, CacheFlag.STICKER, CacheFlag.CLIENT_STATUS, CacheFlag.ONLINE_STATUS, CacheFlag.SCHEDULED_EVENTS)
                 .build().awaitReady();
 
         if(List.of(args).contains("--dev")) jda.getPresence().setPresence(OnlineStatus.IDLE, Activity.competing("a release candidate battle royale."));
-
-        jda.getGuilds().forEach(guild -> {
-            TomlConfiguration.setString("guilds."+guild.getId(), guild.getName());
-//            guild.upsertCommand(SETUP_COMMAND).queue();
-        });
     }
 
 }

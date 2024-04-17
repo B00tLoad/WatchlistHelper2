@@ -1,6 +1,6 @@
 package space.b00tload.discord.watchlist2.workers;
 
-import org.slf4j.simple.SimpleLoggerFactory;
+import org.slf4j.LoggerFactory;
 
 import java.util.Objects;
 import java.util.concurrent.*;
@@ -31,7 +31,7 @@ public class WebRequestThreadPool extends ThreadPoolExecutor {
         }
         if (t != null) {
             // Exception occurred
-            new SimpleLoggerFactory().getLogger("space.b00tload.discord.watchlist2.webrequests").error("Uncaught exception detected:\n\t\t\t{}", t.getMessage(), t);
+            LoggerFactory.getLogger("space.b00tload.discord.watchlist2.webrequests").error("Uncaught exception detected:\n\t\t\t{}", t.getMessage(), t);
             // ... Handle the exception
 
             if(t instanceof Error){
