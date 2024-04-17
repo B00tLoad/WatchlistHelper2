@@ -1,16 +1,17 @@
 package space.b00tload.discord.watchlist2;
 
+import ch.qos.logback.classic.LoggerContext;
+import ch.qos.logback.classic.joran.JoranConfigurator;
+import ch.qos.logback.core.joran.spi.JoranException;
+import ch.qos.logback.core.util.StatusPrinter2;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.OnlineStatus;
-import net.dv8tion.jda.api.Permission;
 import net.dv8tion.jda.api.entities.Activity;
-import net.dv8tion.jda.api.interactions.commands.DefaultMemberPermissions;
-import net.dv8tion.jda.api.interactions.commands.OptionType;
-import net.dv8tion.jda.api.interactions.commands.build.CommandData;
-import net.dv8tion.jda.api.interactions.commands.build.Commands;
 import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import space.b00tload.discord.watchlist2.config.TomlConfiguration;
 
 import java.nio.file.Paths;
@@ -19,10 +20,12 @@ import java.util.*;
 public class WatchlistHelperBot {
 
     public static final String LINE_SEPERATOR = System.lineSeparator();
+    private static final Logger log = LoggerFactory.getLogger(WatchlistHelperBot.class);
     public static String USER_HOME = System.getProperty("user.home");
     public static String SOFTWARE_VERSION;
     public static String USER_AGENT;
-    public static String CONFIG_BASE;
+    public static String APPLICATION_BASE;
+
 
     static {
         SOFTWARE_VERSION = WatchlistHelperBot.class.getPackage().getImplementationVersion();
@@ -30,11 +33,27 @@ public class WatchlistHelperBot {
             SOFTWARE_VERSION = "2.0.0-alpha1-indev";
         }
         USER_AGENT = "WatchlistHelper " + SOFTWARE_VERSION + "(" + System.getProperty("os.name") + "; " + System.getProperty("os.arch") + ") Java/" + System.getProperty("java.version");
+        APPLICATION_BASE = Paths.get(USER_HOME, ".bdu", "watchlist").toString();
     }
 
 
     public static void main(String[] args) throws InterruptedException {
-        CONFIG_BASE = List.of(args).contains("--docker") ?  Paths.get("data", ".bdu", "watchlist").toString() :  Paths.get(USER_HOME, ".bdu", "watchlist").toString();;
+        //Set app base directory depending on whether app is run in docker or not.
+        APPLICATION_BASE = List.of(args).contains("--docker") ?  Paths.get("data", ".bdu", "watchlist").toString() :  Paths.get(USER_HOME, ".bdu", "watchlist").toString();
+
+        //Set up logger
+        LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
+        try {
+            JoranConfigurator configurator = new JoranConfigurator();
+            configurator.setContext(loggerContext);
+            loggerContext.reset();
+            if(List.of(args).contains("--docker")) {
+                configurator.doConfigure(Objects.requireNonNull(WatchlistHelperBot.class.getResource("/logback-docker.xml")));
+            } else {
+                configurator.doConfigure(Objects.requireNonNull(WatchlistHelperBot.class.getResource("/logback-bare.xml")));
+            }
+        } catch (JoranException ignored){}
+        (new StatusPrinter2()).printInCaseOfErrorsOrWarnings(loggerContext);
 
 
         TomlConfiguration.validate(List.of("discord.token"));
