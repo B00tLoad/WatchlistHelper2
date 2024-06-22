@@ -1,6 +1,6 @@
 package space.b00tload.discord.watchlist2.config;
 
-public enum ConfigValues {
+public enum ConfigValues implements space.b00tload.utils.configuration.ConfigValues {
 
     DISCORD_TOKEN("discord-token", "db", "DISCORD_BOT_TOKEN", "discord.token.bot", null),
     DISCORD_APP_ID("discord-app-id", "da", "DISCORD_APPLICATION_ID", "discord.token.applicationid", null),
@@ -11,6 +11,7 @@ public enum ConfigValues {
     DATABASE_PORT("database-port", "DP", "DATABASE_PORT", "db.port", "3306"),
     DATABASE_USER("database-user", "Du", "DATABASE_USER", "db.user", "watchlist"),
     DATABASE_PASSWORD("database-password", "Dp", "DATABASE_PASSWORD", "db.password", "watchlist"),
+    ENDPOINT_PORT("webserver-port", "p", "WEBSERVER_PORT", "webserver.port", "86542"),
     ;
 
     private final String flag, flagAlias, env, toml, defaultValue;
@@ -75,8 +76,8 @@ public enum ConfigValues {
     @Override
     public String toString() {
         return "ConfigValues{" +
-                ", defaultValue='" + defaultValue + '\'' +
-                "tomlPath='" + toml + '\'' +
+                "defaultValue='" + defaultValue + '\'' +
+                ", tomlPath='" + toml + '\'' +
                 ", environmentVarName='" + env + '\'' +
                 ", flagAlias='" + flagAlias + '\'' +
                 ", flag='" + flag + '\'' +

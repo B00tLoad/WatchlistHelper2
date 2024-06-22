@@ -1,4 +1,4 @@
-FROM eclipse-temurin:21.0.2_13-jre-alpine
+FROM eclipse-temurin:21-jre-alpine
 
 LABEL authors="B00tLoad_"
 
