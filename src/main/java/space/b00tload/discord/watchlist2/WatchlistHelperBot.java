@@ -12,11 +12,13 @@ import net.dv8tion.jda.api.requests.GatewayIntent;
 import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import space.b00tload.discord.watchlist2.config.ConfigValues;
+import space.b00tload.discord.watchlist2.config.ConfigurationValues;
+import space.b00tload.discord.watchlist2.database.DatabaseConnector;
 import space.b00tload.utils.configuration.Configuration;
 import space.b00tload.utils.configuration.exceptions.ConfigIncompleteException;
 
 import java.nio.file.Paths;
+import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
@@ -52,6 +54,8 @@ public class WatchlistHelperBot {
             loggerContext.reset();
             if (List.of(args).contains("--docker")) {
                 configurator.doConfigure(Objects.requireNonNull(WatchlistHelperBot.class.getResource("/config/logback/logback-docker.xml")));
+            } else if (List.of(args).contains("--dev")) {
+                configurator.doConfigure(Objects.requireNonNull(WatchlistHelperBot.class.getResource("/config/logback/logback-dev.xml")));
             } else {
                 configurator.doConfigure(Objects.requireNonNull(WatchlistHelperBot.class.getResource("/config/logback/logback-bare.xml")));
             }
@@ -60,16 +64,20 @@ public class WatchlistHelperBot {
         (new StatusPrinter2()).printInCaseOfErrorsOrWarnings(loggerContext);
 
         try {
-            Configuration.init(args, SOFTWARE_VERSION, APPLICATION_BASE, ConfigValues.values());
+            Configuration.init(args, SOFTWARE_VERSION, APPLICATION_BASE, ConfigurationValues.values());
         } catch (ConfigIncompleteException e) {
             log.error("Config incomplete. Missing: {}", e.getMessage());
             System.exit(2);
         }
 
-
+        try {
+            DatabaseConnector.init();
+        } catch (SQLException e) {
+            throw new RuntimeException(e);
+        }
 
         JDA jda = JDABuilder
-                .create(Configuration.getInstance().get(ConfigValues.DISCORD_TOKEN), GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
+                .create(Configuration.getInstance().get(ConfigurationValues.DISCORD_TOKEN), GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
                 .setActivity(Activity.watching("your watchlist."))
 //                .addEventListeners(new SetupCommand(), new GuildJoinListener(), new RecommendButtonInteractionListener())
                 .disableCache(CacheFlag.ACTIVITY, CacheFlag.EMOJI, CacheFlag.STICKER, CacheFlag.CLIENT_STATUS, CacheFlag.ONLINE_STATUS, CacheFlag.SCHEDULED_EVENTS)

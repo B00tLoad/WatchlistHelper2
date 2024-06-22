@@ -1,6 +1,8 @@
 package space.b00tload.discord.watchlist2.config;
 
-public enum ConfigValues {
+import space.b00tload.utils.configuration.ConfigValues;
+
+public enum ConfigurationValues implements ConfigValues {
 
     DISCORD_TOKEN("discord-token", "db", "DISCORD_BOT_TOKEN", "discord.token.bot", null),
     DISCORD_APP_ID("discord-app-id", "da", "DISCORD_APPLICATION_ID", "discord.token.applicationid", null),
@@ -15,7 +17,7 @@ public enum ConfigValues {
 
     private final String flag, flagAlias, env, toml, defaultValue;
 
-    ConfigValues(String flag, String flagAlias, String env, String toml, String defaultValue) {
+    ConfigurationValues(String flag, String flagAlias, String env, String toml, String defaultValue) {
         this.flag = flag;
         this.flagAlias = flagAlias;
         this.env = env;

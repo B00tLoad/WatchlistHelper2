@@ -2,30 +2,25 @@ package space.b00tload.discord.watchlist2.database;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import space.b00tload.discord.watchlist2.config.ConfigValues;
-import space.b00tload.discord.watchlist2.config.Configuration;
+import space.b00tload.discord.watchlist2.config.ConfigurationValues;
+import space.b00tload.utils.configuration.Configuration;
 
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
 
-public class DataBaseConnector {
-
-    public static void main(String[] args) throws SQLException {
-        space.b00tload.discord.watchlist2.config.Configuration.init(args);
-        DataBaseConnector db = DataBaseConnector.getInstance();
-    }
+public class DatabaseConnector {
 
     Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
-    private static DataBaseConnector instance;
+    private static DatabaseConnector instance;
     private Connection connection;
-    private final String url = "jdbc:mysql://" + Configuration.getInstance().get(ConfigValues.DATABASE_URL) + ":" + Configuration.getInstance().get(ConfigValues.DATABASE_PORT) + "/" + Configuration.getInstance().get(ConfigValues.DATABASE_SCHEMA);
-    private final String username = Configuration.getInstance().get(ConfigValues.DATABASE_USER);
-    private final String password = Configuration.getInstance().get(ConfigValues.DATABASE_PASSWORD);
-    private final String schema = Configuration.getInstance().get(ConfigValues.DATABASE_SCHEMA);
+    private final String url = "jdbc:mysql://" + Configuration.getInstance().get(ConfigurationValues.DATABASE_URL) + ":" + Configuration.getInstance().get(ConfigurationValues.DATABASE_PORT) + "/" + Configuration.getInstance().get(ConfigurationValues.DATABASE_SCHEMA);
+    private final String username = Configuration.getInstance().get(ConfigurationValues.DATABASE_USER);
+    private final String password = Configuration.getInstance().get(ConfigurationValues.DATABASE_PASSWORD);
+    private final String schema = Configuration.getInstance().get(ConfigurationValues.DATABASE_SCHEMA);
 
-    private DataBaseConnector() throws SQLException {
+    private DatabaseConnector() throws SQLException {
         try {
             Class.forName("com.mysql.cj.jdbc.Driver");
             this.connection = DriverManager.getConnection(url, username, password);
@@ -35,11 +30,11 @@ public class DataBaseConnector {
                 try (ResultSet rs_getTables = pstmt_getTables.executeQuery()) {
                     List<String> tables = new ArrayList<>();
                     if (rs_getTables.first()) {
-                        tables.add(rs_getTables.getString("table_name"));
-                        while (rs_getTables.next()) {
+                        do {
                             tables.add(rs_getTables.getString("table_name"));
-                        }
+                        } while (rs_getTables.next());
                     }
+                    LOGGER.trace("Found database tables: {}", tables);
                     if (!tables.contains("user")) {
                         LOGGER.debug("creating users table");
                         try (PreparedStatement pstmt_createUserTable = prepareStatement(
@@ -135,13 +130,23 @@ public class DataBaseConnector {
         return connection;
     }
 
-    public static DataBaseConnector getInstance() throws SQLException {
+    public static DatabaseConnector getInstance() {
         if (instance == null) {
-            instance = new DataBaseConnector();
-        } else if (instance.getConnection().isClosed()) {
-            instance = new DataBaseConnector();
+            throw new UnsupportedOperationException("Database Connector not yet initialized.");
+        } else {
+            try {
+                if (instance.getConnection().isClosed()) {
+                    throw new UnsupportedOperationException("Database connection is closed.");
+                }
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
+            }
         }
         return instance;
+    }
+
+    public static void init() throws SQLException {
+        instance = new DatabaseConnector();
     }
 
     public PreparedStatement prepareStatement(String sql) throws SQLException {

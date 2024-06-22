@@ -3,7 +3,7 @@ package space.b00tload.discord.watchlist2.endpointserver;
 import jakarta.servlet.SessionTrackingMode;
 import org.eclipse.jetty.http.HttpCookie;
 import org.eclipse.jetty.server.session.*;
-import space.b00tload.discord.watchlist2.database.DataBaseConnector;
+import space.b00tload.discord.watchlist2.database.DatabaseConnector;
 
 import java.sql.DriverManager;
 import java.sql.SQLException;
@@ -43,7 +43,7 @@ public class SessionHelper {
      */
     private static JDBCSessionDataStoreFactory jdbcDataStoreFactory() {
         try {
-            String url = DataBaseConnector.getInstance().getConnection().getMetaData().getURL();
+            String url = DatabaseConnector.getInstance().getConnection().getMetaData().getURL();
             DatabaseAdaptor databaseAdaptor = new DatabaseAdaptor();
             databaseAdaptor.setDriverInfo(DriverManager.getDriver(url), url);
             JDBCSessionDataStoreFactory jdbcSessionDataStoreFactory = new JDBCSessionDataStoreFactory();
