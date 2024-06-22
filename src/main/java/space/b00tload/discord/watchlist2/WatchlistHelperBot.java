@@ -13,20 +13,18 @@ import net.dv8tion.jda.api.utils.cache.CacheFlag;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.b00tload.discord.watchlist2.config.ConfigValues;
-import space.b00tload.discord.watchlist2.config.Configuration;
-import space.b00tload.discord.watchlist2.config.TomlConfiguration;
-import space.b00tload.discord.watchlist2.exceptions.ConfigIncompleteException;
+import space.b00tload.utils.configuration.Configuration;
+import space.b00tload.utils.configuration.exceptions.ConfigIncompleteException;
 
-import javax.naming.ConfigurationException;
 import java.nio.file.Paths;
-import java.util.*;
-import java.util.stream.Collectors;
+import java.util.List;
+import java.util.Objects;
 
 public class WatchlistHelperBot {
 
     public static final String LINE_SEPERATOR = System.lineSeparator();
     private static final Logger log = LoggerFactory.getLogger(WatchlistHelperBot.class);
-    public static String USER_HOME = System.getProperty("user.home");
+    public static final String USER_HOME = System.getProperty("user.home");
     public static String SOFTWARE_VERSION;
     public static String USER_AGENT;
     public static String APPLICATION_BASE;
@@ -34,7 +32,7 @@ public class WatchlistHelperBot {
 
     static {
         SOFTWARE_VERSION = WatchlistHelperBot.class.getPackage().getImplementationVersion();
-        if(Objects.isNull(SOFTWARE_VERSION)){
+        if (Objects.isNull(SOFTWARE_VERSION)) {
             SOFTWARE_VERSION = "2.0.0-alpha1-indev";
         }
         USER_AGENT = "WatchlistHelper " + SOFTWARE_VERSION + "(" + System.getProperty("os.name") + "; " + System.getProperty("os.arch") + ") Java/" + System.getProperty("java.version");
@@ -44,7 +42,7 @@ public class WatchlistHelperBot {
 
     public static void main(String[] args) throws InterruptedException {
         //Set app base directory depending on whether app is run in docker or not.
-        APPLICATION_BASE = List.of(args).contains("--docker") ?  Paths.get("data", ".bdu", "watchlist").toString() :  Paths.get(USER_HOME, ".bdu", "watchlist").toString();
+        APPLICATION_BASE = List.of(args).contains("--docker") ? Paths.get("data", ".bdu", "watchlist").toString() : Paths.get(USER_HOME, ".bdu", "watchlist").toString();
 
         //Set up logger
         LoggerContext loggerContext = (LoggerContext) LoggerFactory.getILoggerFactory();
@@ -52,20 +50,23 @@ public class WatchlistHelperBot {
             JoranConfigurator configurator = new JoranConfigurator();
             configurator.setContext(loggerContext);
             loggerContext.reset();
-            if(List.of(args).contains("--docker")) {
+            if (List.of(args).contains("--docker")) {
                 configurator.doConfigure(Objects.requireNonNull(WatchlistHelperBot.class.getResource("/config/logback/logback-docker.xml")));
             } else {
                 configurator.doConfigure(Objects.requireNonNull(WatchlistHelperBot.class.getResource("/config/logback/logback-bare.xml")));
             }
-        } catch (JoranException ignored){}
+        } catch (JoranException ignored) {
+        }
         (new StatusPrinter2()).printInCaseOfErrorsOrWarnings(loggerContext);
 
         try {
-            Configuration.init(args);
+            Configuration.init(args, SOFTWARE_VERSION, APPLICATION_BASE, ConfigValues.values());
         } catch (ConfigIncompleteException e) {
-            log.error("Config incomplete. Missing: \n\t\t\t{}", e.getMissingValues().stream().map(Object::toString).collect(Collectors.joining("\n\t\t\t")));
+            log.error("Config incomplete. Missing: {}", e.getMessage());
             System.exit(2);
         }
+
+
 
         JDA jda = JDABuilder
                 .create(Configuration.getInstance().get(ConfigValues.DISCORD_TOKEN), GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
@@ -74,7 +75,8 @@ public class WatchlistHelperBot {
                 .disableCache(CacheFlag.ACTIVITY, CacheFlag.EMOJI, CacheFlag.STICKER, CacheFlag.CLIENT_STATUS, CacheFlag.ONLINE_STATUS, CacheFlag.SCHEDULED_EVENTS)
                 .build().awaitReady();
 
-        if(List.of(args).contains("--dev")) jda.getPresence().setPresence(OnlineStatus.IDLE, Activity.competing("a release candidate battle royale."));
+        if (List.of(args).contains("--dev"))
+            jda.getPresence().setPresence(OnlineStatus.IDLE, Activity.competing("a release candidate battle royale."));
     }
 
 }

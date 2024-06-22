@@ -8,6 +8,11 @@
     <artifactId>WatchlistFinder</artifactId>
     <version>2.0.0-alpha1-indev</version>
 
+    <name>WatchlistHelper2</name>
+    <description>A tool to manage a groups' watchlist of videos/shows/movies. Primarily focused on groups based around a Discord server.</description>
+    <inceptionYear>2024</inceptionYear>
+    <url>https://github.com/B00tLoad/WatchlistHelper2</url>
+
     <developers>
         <developer>
             <id>B00tLoad_</id>
@@ -18,7 +23,7 @@
             </roles>
             <timezone>Europe/Berlin</timezone>
             <properties>
-                <disordHandle>@b00tload</disordHandle>
+                <disordHandle>@b00tload_</disordHandle>
                 <mastodonhandle>@b00tload_</mastodonhandle>
                 <mastodoninstance>order-of-gathering.de</mastodoninstance>
                 <blueskyHandle>@b00tload.space</blueskyHandle>
@@ -29,7 +34,7 @@
 
     <issueManagement>
         <system>GitHub</system>
-        <url>https://github.com/B00tLoad/WatchlistHelper/issues</url>
+        <url>https://github.com/B00tLoad/WatchlistHelper2/issues</url>
     </issueManagement>
 
     <properties>
@@ -70,10 +75,94 @@
     </build>
 
     <dependencies>
+<!--        config-->
+        <dependency>
+            <groupId>space.b00tload.utils</groupId>
+            <artifactId>ConfigurationUtilities</artifactId>
+            <version>1.0.0</version>
+        </dependency>
+
+<!--        http requests-->
+        <dependency>
+            <groupId>com.squareup.okhttp3</groupId>
+            <artifactId>okhttp</artifactId>
+            <version>4.12.0</version>
+        </dependency>
+
+<!--        webserver-->
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin</artifactId>
+            <version>6.1.6</version>
+        </dependency>
+
+        <dependency>
+            <groupId>io.javalin</groupId>
+            <artifactId>javalin-micrometer</artifactId>
+            <version>6.1.6</version>
+        </dependency>
+        <dependency>
+            <groupId>io.micrometer</groupId>
+            <artifactId>micrometer-registry-prometheus</artifactId>
+            <version>1.13.1</version>
+        </dependency>
+
+<!--        db-->
+        <dependency>
+            <groupId>com.mysql</groupId>
+            <artifactId>mysql-connector-j</artifactId>
+            <version>8.4.0</version>
+        </dependency>
+
+<!--        logging-->
+        <dependency>
+            <groupId>ch.qos.logback</groupId>
+            <artifactId>logback-classic</artifactId>
+            <version>1.5.6</version>
+        </dependency>
+
+<!--        html from java code-->
+        <dependency>
+            <groupId>com.j2html</groupId>
+            <artifactId>j2html</artifactId>
+            <version>1.6.0</version>
+        </dependency>
+
+<!--        json-->
+        <dependency>
+            <groupId>com.google.code.gson</groupId>
+            <artifactId>gson</artifactId>
+            <version>2.11.0</version>
+        </dependency>
+
+<!--        npm packages (webjars)-->
+        <dependency>
+            <groupId>org.webjars.npm</groupId>
+            <artifactId>bootstrap</artifactId>
+            <version>5.3.3</version>
+        </dependency>
+        <dependency>
+            <groupId>org.webjars</groupId>
+            <artifactId>font-awesome</artifactId>
+            <version>6.5.2</version>
+        </dependency>
+
+<!--        apis-->
+        <dependency>
+            <groupId>uk.co.conoregan</groupId>
+            <artifactId>themoviedbapi</artifactId>
+            <version>2.0.4</version>
+            <exclusions>
+                <exclusion>
+                    <groupId>org.slf4j</groupId>
+                    <artifactId>slf4j-api</artifactId>
+                </exclusion>
+            </exclusions>
+        </dependency>
         <dependency>
             <groupId>net.dv8tion</groupId>
             <artifactId>JDA</artifactId>
-            <version>5.0.0-beta.21</version>
+            <version>5.0.0-beta.24</version>
             <exclusions>
                 <exclusion>
                     <groupId>club.minnced</groupId>
@@ -85,62 +174,8 @@
                 </exclusion>
             </exclusions>
         </dependency>
-        <dependency>
-            <groupId>com.electronwill.night-config</groupId>
-            <artifactId>toml</artifactId>
-            <version>3.6.7</version>
-        </dependency>
-        <dependency>
-            <groupId>com.squareup.okhttp3</groupId>
-            <artifactId>okhttp</artifactId>
-            <version>4.12.0</version>
-        </dependency>
-        <dependency>
-            <groupId>io.javalin</groupId>
-            <artifactId>javalin</artifactId>
-            <version>6.1.3</version>
-        </dependency>
-        <dependency>
-            <groupId>com.h2database</groupId>
-            <artifactId>h2</artifactId>
-            <version>2.2.224</version>
-        </dependency>
-        <dependency>
-            <groupId>ch.qos.logback</groupId>
-            <artifactId>logback-classic</artifactId>
-            <version>1.5.5</version>
-        </dependency>
-        <dependency>
-            <groupId>com.j2html</groupId>
-            <artifactId>j2html</artifactId>
-            <version>1.6.0</version>
-        </dependency>
-        <dependency>
-            <groupId>com.google.code.gson</groupId>
-            <artifactId>gson</artifactId>
-            <version>2.10.1</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars.npm</groupId>
-            <artifactId>bootstrap</artifactId>
-            <version>5.3.3</version>
-        </dependency>
-        <dependency>
-            <groupId>org.webjars</groupId>
-            <artifactId>font-awesome</artifactId>
-            <version>6.5.1</version>
-        </dependency>
-        <dependency>
-            <groupId>uk.co.conoregan</groupId>
-            <artifactId>themoviedbapi</artifactId>
-            <version>2.0.2</version>
-            <exclusions>
-                <exclusion>
-                    <groupId>org.slf4j</groupId>
-                    <artifactId>slf4j-api</artifactId>
-                </exclusion>
-            </exclusions>
-        </dependency>
+
+<!--        executes executables-->
         <dependency>
             <groupId>org.zeroturnaround</groupId>
             <artifactId>zt-exec</artifactId>

@@ -6,6 +6,11 @@ public enum ConfigValues {
     DISCORD_APP_ID("discord-app-id", "da", "DISCORD_APPLICATION_ID", "discord.token.applicationid", null),
     DISCORD_PUB_KEY("discord-public-key", "dp", "DISCORD_PUBLIC_KEY", "discord.token.publickey", null),
     W2G_TOKEN("w2g-token", "w", "W2G_API_TOKEN", "w2g.token", null),
+    DATABASE_SCHEMA("database-schema", "Ds", "DATABASE_SCHEMA", "db.schema", "watchlist"),
+    DATABASE_URL("database-url", "DU", "DATABASE_URL", "db.url", "db"),
+    DATABASE_PORT("database-port", "DP", "DATABASE_PORT", "db.port", "3306"),
+    DATABASE_USER("database-user", "Du", "DATABASE_USER", "db.user", "watchlist"),
+    DATABASE_PASSWORD("database-password", "Dp", "DATABASE_PASSWORD", "db.password", "watchlist"),
     ;
 
     private final String flag, flagAlias, env, toml, defaultValue;
