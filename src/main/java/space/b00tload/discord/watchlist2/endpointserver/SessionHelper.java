@@ -10,12 +10,12 @@ import java.sql.SQLException;
 import java.util.Set;
 
 /**
- * This class provides helper methods for handling sessions in LiToChat web application.
+ * This class provides helper methods for handling sessions in WatchlistHelper2 web application.
  */
 public class SessionHelper {
 
     /**
-     * Creates a new session handler object to manage sessions in the LiToChat application.
+     * Creates a new session handler object to manage sessions in the WatchlistHelper2 application.
      *
      * @return a new session handler object
      */
@@ -36,14 +36,14 @@ public class SessionHelper {
     }
 
     /**
-     * Creates a new JDBC session data store factory object to store session data in a H2 database.
+     * Creates a new JDBC session data store factory object to store session data in a MySQL/MariaDB database.
      *
      * @return a new JDBC session data store factory object
      * @throws RuntimeException if an SQL exception occurs while creating the data store factory object
      */
     private static JDBCSessionDataStoreFactory jdbcDataStoreFactory() {
         try {
-            String url = DatabaseConnector.getInstance().getConnection().getMetaData().getURL();
+            String url = DatabaseConnector.Persistent.getInstance().getConnection().getMetaData().getURL();
             DatabaseAdaptor databaseAdaptor = new DatabaseAdaptor();
             databaseAdaptor.setDriverInfo(DriverManager.getDriver(url), url);
             JDBCSessionDataStoreFactory jdbcSessionDataStoreFactory = new JDBCSessionDataStoreFactory();

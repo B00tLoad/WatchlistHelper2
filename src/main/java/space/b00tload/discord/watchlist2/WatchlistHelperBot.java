@@ -30,6 +30,7 @@ public class WatchlistHelperBot {
     public static String SOFTWARE_VERSION;
     public static String USER_AGENT;
     public static String APPLICATION_BASE;
+    public static JDA jda;
 
 
     static {
@@ -71,12 +72,15 @@ public class WatchlistHelperBot {
         }
 
         try {
-            DatabaseConnector.init();
+            DatabaseConnector.Persistent.init();
         } catch (SQLException e) {
             throw new RuntimeException(e);
+        } catch (Exception e) {
+            log.error(e.getMessage(), e);
         }
+        DatabaseConnector.Cache.init();
 
-        JDA jda = JDABuilder
+        jda = JDABuilder
                 .create(Configuration.getInstance().get(ConfigurationValues.DISCORD_TOKEN), GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
                 .setActivity(Activity.watching("your watchlist."))
 //                .addEventListeners(new SetupCommand(), new GuildJoinListener(), new RecommendButtonInteractionListener())

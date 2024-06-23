@@ -7,6 +7,7 @@ public enum ConfigurationValues implements ConfigValues {
     DISCORD_TOKEN("discord-token", "db", "DISCORD_BOT_TOKEN", "discord.token.bot", null),
     DISCORD_APP_ID("discord-app-id", "da", "DISCORD_APPLICATION_ID", "discord.token.applicationid", null),
     DISCORD_PUB_KEY("discord-public-key", "dp", "DISCORD_PUBLIC_KEY", "discord.token.publickey", null),
+    CALLBACK_URL("discord-callback-url", "dc", "DISCORD_CALLBACK_URL", "discord.callback", null),
     W2G_TOKEN("w2g-token", "w", "W2G_API_TOKEN", "w2g.token", null),
     DATABASE_SCHEMA("database-schema", "Ds", "DATABASE_SCHEMA", "db.schema", "watchlist"),
     DATABASE_URL("database-url", "DU", "DATABASE_URL", "db.url", "db"),
