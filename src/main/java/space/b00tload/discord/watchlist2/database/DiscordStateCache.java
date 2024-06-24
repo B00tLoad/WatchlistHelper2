@@ -11,17 +11,20 @@ import java.util.TimerTask;
 
 public class DiscordStateCache {
 
-    private static Logger LOGGER = LoggerFactory.getLogger(DiscordStateCache.class);
+    private final static Logger LOGGER = LoggerFactory.getLogger(DiscordStateCache.class);
+
 
     public static String createState(String session, String targetUrl){
         String state = generateStateString();
-        try (Connection con = DatabaseConnector.Cache.getInstance().getConnection(); PreparedStatement pstmt_insertState = con.prepareStatement("INSERT INTO discordstates (websession, state, target_url) VALUES ( ?, ?, ? )");){
+        try (Connection con = DatabaseConnector.Cache.getInstance().getConnection(); PreparedStatement pstmt_insertState = con.prepareStatement("INSERT INTO discordstates (websession, state, target_url) VALUES ( ?, ?, ? )")){
             pstmt_insertState.setString(1, session);
             pstmt_insertState.setString(2, state);
             pstmt_insertState.setString(3, targetUrl);
-            pstmt_insertState.executeUpdate();
+            if(pstmt_insertState.executeUpdate() != 1){
+                throw new UnsupportedOperationException("error while inserting state.");
+            }
         } catch (SQLException e) {
-            throw new RuntimeException(e);
+            LOGGER.error(e.getMessage(), e);
         }
         return state;
     }
@@ -39,7 +42,7 @@ public class DiscordStateCache {
     public static void init(boolean foundTable){
 
         if(!foundTable){
-            try (Connection con = DatabaseConnector.Cache.INSTANCE.getConnection(); Statement stmt_discordStateTable = con.createStatement()) {
+            try (Connection con = DatabaseConnector.Cache.dataSource.getConnection(); Statement stmt_discordStateTable = con.createStatement()) {
                 LOGGER.debug("Creating discord api state table");
                 stmt_discordStateTable.execute("CREATE TABLE IF NOT EXISTS `discordstates` (" +
                         "    `websession` varchar(120)," +
@@ -52,7 +55,7 @@ public class DiscordStateCache {
             }
         }
 
-        Timer timer = new Timer("DiscordStatePurging");
+        Timer timer = new Timer("DiscordStateCache housekeeper");
         timer.schedule(new TimerTask() {
             @Override
             public void run() {

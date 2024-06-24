@@ -18,7 +18,6 @@ import space.b00tload.utils.configuration.Configuration;
 import space.b00tload.utils.configuration.exceptions.ConfigIncompleteException;
 
 import java.nio.file.Paths;
-import java.sql.SQLException;
 import java.util.List;
 import java.util.Objects;
 
@@ -60,7 +59,9 @@ public class WatchlistHelperBot {
             } else {
                 configurator.doConfigure(Objects.requireNonNull(WatchlistHelperBot.class.getResource("/config/logback/logback-bare.xml")));
             }
-        } catch (JoranException ignored) {
+        } catch (JoranException e) {
+            log.error(e.getMessage(), e);
+            System.exit(4);
         }
         (new StatusPrinter2()).printInCaseOfErrorsOrWarnings(loggerContext);
 
@@ -73,12 +74,11 @@ public class WatchlistHelperBot {
 
         try {
             DatabaseConnector.Persistent.init();
-        } catch (SQLException e) {
-            throw new RuntimeException(e);
+            DatabaseConnector.Cache.init();
         } catch (Exception e) {
             log.error(e.getMessage(), e);
+            System.exit(3);
         }
-        DatabaseConnector.Cache.init();
 
         jda = JDABuilder
                 .create(Configuration.getInstance().get(ConfigurationValues.DISCORD_TOKEN), GatewayIntent.GUILD_MESSAGES, GatewayIntent.GUILD_MESSAGE_REACTIONS, GatewayIntent.GUILD_VOICE_STATES, GatewayIntent.GUILD_MEMBERS, GatewayIntent.MESSAGE_CONTENT)
@@ -89,6 +89,7 @@ public class WatchlistHelperBot {
 
         if (List.of(args).contains("--dev"))
             jda.getPresence().setPresence(OnlineStatus.IDLE, Activity.competing("a release candidate battle royale."));
+
     }
 
 }

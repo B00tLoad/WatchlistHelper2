@@ -6,14 +6,19 @@ public enum ConfigurationValues implements ConfigValues {
 
     DISCORD_TOKEN("discord-token", "db", "DISCORD_BOT_TOKEN", "discord.token.bot", null),
     DISCORD_APP_ID("discord-app-id", "da", "DISCORD_APPLICATION_ID", "discord.token.applicationid", null),
+    DISCORD_APP_SECRET("discord-app-secret", "dA", "DISCORD_APPLICATION_SECRET", "discord.token.applicationsecret", null),
     DISCORD_PUB_KEY("discord-public-key", "dp", "DISCORD_PUBLIC_KEY", "discord.token.publickey", null),
-    CALLBACK_URL("discord-callback-url", "dc", "DISCORD_CALLBACK_URL", "discord.callback", null),
+    DISCORD_CALLBACK_URL("discord-callback-url", "dc", "DISCORD_CALLBACK_URL", "discord.callback", null),
+    DISCORD_HOME_GUILD("discord-home-guild", "dh", "DISCORD_HOME_GUILD", "discord.ids.guild", null),
+    DISCORD_ACCESS_ROLE("discord-access-role", "dr", "DISCORD_ACCESS_ROLE", "discord.ids.role.access", null),
+    DISCORD_ADMIN_ROLE("discord-admin-role", "dR", "DISCORD_ADMIN_ROLE", "discord.ids.role.admin", null),
     W2G_TOKEN("w2g-token", "w", "W2G_API_TOKEN", "w2g.token", null),
     DATABASE_SCHEMA("database-schema", "Ds", "DATABASE_SCHEMA", "db.schema", "watchlist"),
     DATABASE_URL("database-url", "DU", "DATABASE_URL", "db.url", "db"),
     DATABASE_PORT("database-port", "DP", "DATABASE_PORT", "db.port", "3306"),
     DATABASE_USER("database-user", "Du", "DATABASE_USER", "db.user", "watchlist"),
     DATABASE_PASSWORD("database-password", "Dp", "DATABASE_PASSWORD", "db.password", "watchlist"),
+    SNOWFLAKE_URL("snowflake-url", "s", "SNOWFLAKE_URL", "snowflake.url", "http://snowflake:9567"),
     ;
 
     private final String flag, flagAlias, env, toml, defaultValue;

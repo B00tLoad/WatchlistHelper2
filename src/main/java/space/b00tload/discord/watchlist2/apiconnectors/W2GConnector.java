@@ -69,7 +69,6 @@ public class W2GConnector {
      * @throws TimeoutException     if the worker thread has not responded after 5 seconds.
      */
     public String createRoom(String item_url) throws InterruptedException, ExecutionException, TimeoutException {
-        Object o = this;
         Future<String> f = WebRequestThreadPool.getInstance().submit(() -> {
             OkHttpClient http = new OkHttpClient(new OkHttpClient.Builder().protocols(List.of(Protocol.HTTP_2, Protocol.HTTP_1_1)));
             JsonObject bodyJson = new JsonObject();

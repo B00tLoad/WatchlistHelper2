@@ -1,0 +1,82 @@
+Project watchlist_helper {
+  database_type: 'MariaDB'
+  Note: 'Watchlist Helper'
+}
+
+Enum "watchlist"."entry_type" {
+  "video"
+  "show"
+  "season"
+  "episode"
+  "movie"
+}
+
+Enum "watchlist"."like_level" {
+  "not_interested"
+  "interested"
+  "interested_watched"
+  "interested_required"
+}
+
+Table "watchlist"."user" {
+  "snowflake" bigint [pk, not null, note: 'Internal user ID']
+  "discord_id" bigint [not null, note: 'SnowflakeID as assigned by Discord']
+  "avatar" varchar(255) [note: 'Cached Avatar data from Discord. points to file in fs']
+  "discorddata" blob [not null, note: 'Holds a serialized DiscordAuthData object']
+  "registered_since" timestamp [not null]
+  "last_seen" timestamp
+  "is_member" boolean
+  "is_admin" boolean
+}
+
+Table "watchlist"."entry" {
+  "snowflake" bigint [pk, not null]
+  "title" varchar(255) [not null]
+  "hash" varchar(255) [unique, not null]
+  "type" watchlist.entry_type [not null, default: `'video'`]
+  "thumbnail" varchar(255) [not null, note: 'Points to a file in fs']
+  "entered_at" timestamp [not null, default: `now()`]
+  "entered_by" bigint [not null]
+  "watched" bool [not null, default: false]
+  "index" int [not null, default: 0]
+  "parent" bigint [default: null]
+}
+
+Table "watchlist"."providers" {
+  "id" integer [pk, not null, increment]
+  "name" varchar(255) [not null]
+  "url" varchar(255) [not null]
+  "requires_subscription" bool [default: false]
+}
+
+Table "watchlist"."likes" {
+  "user_id" bigint [not null]
+  "entry_id" bigint [not null]
+  "level" watchlist.like_level [not null, default: `'not_interested'`]
+
+  Indexes {
+    (user_id, entry_id) [pk]
+  }
+}
+
+Table "watchlist"."availability" {
+  "entry_id" bigint [not null]
+  "provider_id" integer [not null]
+  "url" varchar(255) [not null]
+
+  Indexes {
+    (provider_id, entry_id) [pk]
+  }
+}
+
+Ref:"watchlist"."user"."snowflake" < "watchlist"."likes"."user_id"
+
+Ref:"watchlist"."entry"."snowflake" < "watchlist"."likes"."entry_id"
+
+Ref:"watchlist"."entry"."snowflake" < "watchlist"."availability"."entry_id"
+
+Ref:"watchlist"."providers"."id" < "watchlist"."availability"."provider_id"
+
+Ref:"watchlist"."user"."snowflake" < "watchlist"."entry"."entered_by"
+
+Ref:"watchlist"."entry"."snowflake" < "watchlist"."entry"."parent"

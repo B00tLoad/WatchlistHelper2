@@ -3,32 +3,25 @@ package space.b00tload.discord.watchlist2.database;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
 import org.h2.jdbcx.JdbcDataSource;
-import org.h2.jdbcx.JdbcDataSourceFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import space.b00tload.discord.watchlist2.config.ConfigurationValues;
 import space.b00tload.utils.configuration.Configuration;
 
-import javax.sql.DataSource;
 import java.sql.*;
-import java.time.LocalDateTime;
-import java.time.temporal.ChronoUnit;
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Timer;
-import java.util.TimerTask;
 
 public class DatabaseConnector {
 
     public static class Persistent {
-        Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-
         private static Persistent INSTANCE;
-        private HikariDataSource dataSource;
         private final String url = "jdbc:mysql://" + Configuration.getInstance().get(ConfigurationValues.DATABASE_URL) + ":" + Configuration.getInstance().get(ConfigurationValues.DATABASE_PORT) + "/" + Configuration.getInstance().get(ConfigurationValues.DATABASE_SCHEMA);
         private final String username = Configuration.getInstance().get(ConfigurationValues.DATABASE_USER);
         private final String password = Configuration.getInstance().get(ConfigurationValues.DATABASE_PASSWORD);
         private final String schema = Configuration.getInstance().get(ConfigurationValues.DATABASE_SCHEMA);
+        Logger LOGGER = LoggerFactory.getLogger(this.getClass());
+        private HikariDataSource dataSource;
 
         private Persistent() throws SQLException {
             try {
@@ -56,11 +49,15 @@ public class DatabaseConnector {
                         if (!tables.contains("user")) {
                             LOGGER.debug("creating users table");
                             try (PreparedStatement pstmt_createUserTable = prepareStatement(
-                                    "CREATE TABLE `" + schema + "`.`user` (`snowflake` bigint PRIMARY KEY NOT NULL, " +
-                                            "`username` varchar(255) NOT NULL, " +
+                                    "CREATE TABLE `" + schema + "`.`user` (" +
+                                            "`snowflake` bigint PRIMARY KEY NOT NULL, " +
+                                            "`discord_id` bigint NOT NULL, " +
                                             "`avatar` varchar(255), " +
                                             "`discorddata` blob NOT NULL, " +
-                                            "`registered_since` timestamp NOT NULL, `last_seen` timestamp);")) {
+                                            "`registered_since` timestamp NOT NULL, " +
+                                            "`last_seen` timestamp, " +
+                                            "`is_member` boolean default false, " +
+                                            "`is_admin` boolean default false);")) {
                                 pstmt_createUserTable.execute();
                             }
                         }
@@ -144,27 +141,24 @@ public class DatabaseConnector {
             }
         }
 
-        public Connection getConnection() throws SQLException {
-            return dataSource.getConnection();
-        }
-
         public static Persistent getInstance() {
             if (INSTANCE == null) {
                 throw new UnsupportedOperationException("Database Connector not yet initialized.");
             } else {
-                try {
-                    if (INSTANCE.getConnection().isClosed()) {
-                        throw new UnsupportedOperationException("Database connection is closed.");
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                if (INSTANCE.dataSource.isClosed()) {
+                    throw new UnsupportedOperationException("Database connection is closed.");
                 }
+
             }
             return INSTANCE;
         }
 
         public static void init() throws SQLException {
             INSTANCE = new Persistent();
+        }
+
+        public Connection getConnection() throws SQLException {
+            return dataSource.getConnection();
         }
 
         public PreparedStatement prepareStatement(String sql) throws SQLException {
@@ -177,9 +171,9 @@ public class DatabaseConnector {
     }
 
     public static class Cache {
-        Logger LOGGER = LoggerFactory.getLogger(this.getClass());
-        static Cache INSTANCE;
-        HikariDataSource dataSource;
+        private static final Logger LOGGER = LoggerFactory.getLogger(Cache.class);
+        static HikariDataSource dataSource;
+        private static Cache INSTANCE;
 
         public Cache() {
             HikariConfig config = new HikariConfig();
@@ -187,12 +181,12 @@ public class DatabaseConnector {
             ds.setURL("jdbc:h2:mem:watchlisthelper;DB_CLOSE_DELAY=-1");
             config.setDataSource(ds);
             config.setPoolName("watchlisthelperCachePool");
+            config.setLeakDetectionThreshold(15000L);
             dataSource = new HikariDataSource(config);
 
-            try (Connection con = getConnection();
-                 PreparedStatement pstmt_getTables = con.prepareStatement(
-                         "SELECT table_name FROM information_schema.tables WHERE table_schema = ?;",
-                         ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
+            try (Connection con = getConnection(); PreparedStatement pstmt_getTables = con.prepareStatement(
+                    "SELECT table_name FROM information_schema.tables WHERE table_schema = ?;",
+                    ResultSet.TYPE_SCROLL_SENSITIVE, ResultSet.CONCUR_READ_ONLY)) {
                 pstmt_getTables.setString(1, "PUBLIC");
                 try (ResultSet rs_getTables = pstmt_getTables.executeQuery()) {
                     List<String> tables = new ArrayList<>();
@@ -215,12 +209,8 @@ public class DatabaseConnector {
             if (INSTANCE == null) {
                 throw new UnsupportedOperationException("Database Connector not yet initialized.");
             } else {
-                try {
-                    if (INSTANCE.getConnection().isClosed()) {
-                        throw new UnsupportedOperationException("Database connection is closed.");
-                    }
-                } catch (SQLException e) {
-                    throw new RuntimeException(e);
+                if (dataSource.isClosed()) {
+                    throw new UnsupportedOperationException("Database connection is closed.");
                 }
             }
             return INSTANCE;

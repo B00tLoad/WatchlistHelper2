@@ -1,0 +1,11 @@
+Project watchlist_helper_cache {
+  database_type: 'H2'
+  Note: 'Watchlist Helper Cache'
+}
+
+Table discordstates {
+  websession varchar(120)
+  state varchar
+  targeturl varchar
+  requested_at timestamp [default: `now()`]
+}
