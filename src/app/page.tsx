@@ -1,12 +1,12 @@
 
-import { HydrateClient } from "~/trpc/server";
+
 import { Button } from "~/components/ui/button";
 import { PlayIcon } from "~/app/_components/icons";
 
 export default async function Home() {
 
   return (
-    <HydrateClient>
+
       <div className="grid grid-cols-2 gap-4 p-6 sm:grid-cols-3 md:grid-cols-4 lg:grid-cols-5">
         <div className="group relative overflow-hidden rounded-lg">
           <img
@@ -167,6 +167,5 @@ export default async function Home() {
           </div>
         </div>
       </div>
-    </HydrateClient>
   );
 }
