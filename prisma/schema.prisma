@@ -23,7 +23,8 @@ model Entry {
 
   watched Boolean
 
-  parent   Entry   @relation(fields: [parentId], references: [id], name: "pc")
+  parent   Entry?  @relation(fields: [parentId], references: [id], name: "pc")
+  parentId String?
   children Entry[] @relation(name: "pc")
 
   createdAt DateTime @default(now())
@@ -31,7 +32,6 @@ model Entry {
 
   createdBy   User   @relation(fields: [createdById], references: [id])
   createdById String
-  parentId    String
 
   providers Availability[]
   likes     Likes[]
@@ -129,4 +129,8 @@ enum LikeLevel {
   INTETESTED
   INTERESTED_WATCHED
   INTERESTED_REQUIRED
+}
+
+generator zod {
+  provider = "zod-prisma-types"
 }
