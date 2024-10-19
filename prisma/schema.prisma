@@ -113,6 +113,7 @@ model Provider {
   name                  String
   url                   String
   requires_subscription Boolean
+  icon                  String
   entries               Availability[]
 }
 
