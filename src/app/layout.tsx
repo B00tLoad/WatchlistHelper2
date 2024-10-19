@@ -137,6 +137,7 @@ export default async function RootLayout({
                                 <AvatarImage
                                   src={session.user.image}
                                   alt={"@" + session.user.name}
+                                  title={"@" + session.user.name}
                                 />
                               )}
                             <AvatarFallback

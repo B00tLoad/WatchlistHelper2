@@ -28,7 +28,9 @@ export const entryRouter = createTRPCRouter({
           hash: "", //TODO
           id: snowflake.generate(),
           type: input.type,
-          parent: input.parentId ? {connect: {id: input.parentId}} : undefined,
+          parent: input.parentId
+            ? { connect: { id: input.parentId } }
+            : undefined,
           thumbnail: input.thumbnail,
           watched: false,
         },
@@ -62,11 +64,9 @@ export const entryRouter = createTRPCRouter({
   getById: protectedProcedure
     .input(z.string())
     .query(async ({ ctx, input }) => {
-      const entry = await ctx.db.entry.findUnique({
+      return ctx.db.entry.findUnique({
         where: { id: input },
       });
-
-      return entry;
     }),
 
   getLatest: protectedProcedure.query(async ({ ctx }) => {
